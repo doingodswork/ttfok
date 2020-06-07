@@ -6,11 +6,11 @@ CLI to measure the startup time of a web service until it serves a request
 
 ## Usage
 
-`ttfok "/path/to/your/app" "http://localhost:8080/some/path"`
+`ttfok /path/to/your/app http://localhost:8080/some/path`
 
 Or with app arguments:
 
-`ttfok "/path/to/your/app" "--some" "arg" "--another" "arg" "http://localhost:8080/some/path"`
+`ttfok /path/to/your/app --some arg --another arg http://localhost:8080/some/path`
 
 To customize times:
 
@@ -23,4 +23,4 @@ To customize times:
 
 ### Example
 
-`ttfok -w 2s node "./addon.js" "http://localhost:7000/manifest.json"`
+`ttfok -w 2s node ./addon.js http://localhost:7000/manifest.json`
