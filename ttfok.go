@@ -26,6 +26,12 @@ func main() {
 	if err := cmd.Start(); err != nil {
 		log.Fatalf("Couldn't start app: %v", err)
 	}
+	// Kill process at the end
+	defer func() {
+		if err := cmd.Process.Kill(); err != nil {
+			log.Printf("Couldn't kill process (PID: %v): %v", cmd.Process.Pid, err)
+		}
+	}()
 
 	// Make requests
 	http.DefaultClient.Timeout = time.Millisecond
