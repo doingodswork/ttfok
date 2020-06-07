@@ -15,13 +15,18 @@ func main() {
 	flag.Parse()
 
 	// Precondition check
-	if len(flag.Args()) != 2 {
-		log.Fatalf("Bad number of arguments. Requires 2, but was %v", len(flag.Args()))
+	argCount := len(flag.Args())
+	if argCount < 2 {
+		log.Fatalf("Bad number of arguments. Requires 2, but was %v", argCount)
 	}
 
 	// Read arguments
 	app := flag.Arg(0)
-	appURL := flag.Arg(1)
+	appURL := flag.Arg(argCount - 1)
+	var args []string
+	if argCount > 2 {
+		args = append(args, flag.Args()[1:argCount-1]...)
+	}
 
 	// Check if app is already running
 	http.DefaultClient.Timeout = time.Second
@@ -38,7 +43,7 @@ func main() {
 	}
 
 	// Run app
-	cmd := exec.Command(app)
+	cmd := exec.Command(app, args...)
 	start := time.Now()
 	if err := cmd.Start(); err != nil {
 		log.Fatalf("Couldn't start app: %v", err)
