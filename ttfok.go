@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -43,9 +44,13 @@ func main() {
 		log.Fatalf("Couldn't start app: %v", err)
 	}
 	// Kill process at the end
+	waitExceeded := false
 	defer func() {
 		if err := cmd.Process.Kill(); err != nil {
 			log.Printf("Couldn't kill process (PID: %v): %v", cmd.Process.Pid, err)
+		}
+		if waitExceeded {
+			os.Exit(1)
 		}
 	}()
 
@@ -56,7 +61,14 @@ func main() {
 		if err == nil && res.StatusCode == http.StatusOK {
 			break
 		}
+		if time.Since(start) >= time.Second {
+			log.Println("App didn't start within 1s. Exiting...")
+			waitExceeded = true
+			break
+		}
 	}
 
-	log.Printf("Time to first OK: %v", time.Since(start))
+	if !waitExceeded {
+		log.Printf("Time to first OK: %v", time.Since(start))
+	}
 }
