@@ -11,6 +11,11 @@ import (
 	"time"
 )
 
+var (
+	timeout = flag.Duration("t", time.Millisecond, "Timeout for the request")
+	wait    = flag.Duration("w", time.Second, "Duration to wait for app start")
+)
+
 func main() {
 	flag.Parse()
 
@@ -29,7 +34,7 @@ func main() {
 	}
 
 	// Check if app is already running
-	http.DefaultClient.Timeout = time.Second
+	http.DefaultClient.Timeout = *timeout + time.Second
 	_, err := http.Get(appURL)
 	if err == nil {
 		log.Fatal("The app seems to be running already")
@@ -60,14 +65,14 @@ func main() {
 	}()
 
 	// Make requests
-	http.DefaultClient.Timeout = time.Millisecond
+	http.DefaultClient.Timeout = *timeout
 	for {
 		res, err := http.Get(appURL)
 		if err == nil && res.StatusCode == http.StatusOK {
 			break
 		}
-		if time.Since(start) >= time.Second {
-			log.Println("App didn't start within 1s. Exiting...")
+		if time.Since(start) >= *wait {
+			log.Printf("App didn't start within %v. Exiting...", *wait)
 			waitExceeded = true
 			break
 		}
