@@ -4,7 +4,9 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"net/url"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -19,6 +21,20 @@ func main() {
 	// Read arguments
 	app := flag.Arg(0)
 	appURL := flag.Arg(1)
+
+	// Check if app is already running
+	http.DefaultClient.Timeout = time.Second
+	_, err := http.Get(appURL)
+	if err == nil {
+		log.Fatal("The app seems to be running already")
+	}
+	urlErr, ok := err.(*url.Error)
+	if !ok {
+		log.Fatalf("Expected `*url.Error` during check if the app is already running, but error type %T; error: %v", err, err)
+	}
+	if !strings.Contains(urlErr.Error(), "connection refused") {
+		log.Fatalf("Expected \"connection refused\" error, but was: %v", urlErr.Error())
+	}
 
 	// Run app
 	cmd := exec.Command(app)
